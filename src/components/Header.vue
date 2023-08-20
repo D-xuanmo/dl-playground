@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import { type Ref } from 'vue'
+import { MessagePlugin } from '@xuanmo/dl-common'
 import { type ReplStore, type VersionKey } from '@/composables/store'
-import {
-  getSupportedEpVersions,
-  getSupportedTSVersions,
-  getSupportedVueVersions,
-} from '@/utils/dependency'
+import { ShareOutlined, LightOutlined, GithubOutlined, DarkOutlined } from '@xuanmo/dl-icons'
 
 const appVersion = import.meta.env.APP_VERSION
 const replVersion = import.meta.env.REPL_VERSION
 
-const nightly = ref(false)
 const dark = useDark()
 const toggleDark = useToggle(dark)
 
@@ -20,42 +15,31 @@ const { store } = defineProps<{
 
 interface Version {
   text: string
-  published: Ref<string[]>
   active: string
 }
 
-const versions = reactive<Record<VersionKey, Version>>({
-  elementPlus: {
-    text: 'Element Plus',
-    published: getSupportedEpVersions(nightly),
-    active: store.versions.elementPlus,
+const versions = computed<Record<VersionKey, Version>>(() => ({
+  dlCommon: {
+    text: 'DLCommon',
+    active: store.versions.dlCommon
+  },
+  dlui: {
+    text: 'DLUI',
+    active: store.versions.dlui
   },
   vue: {
     text: 'Vue',
-    published: getSupportedVueVersions(),
-    active: store.versions.vue,
+    active: store.versions.vue
   },
   typescript: {
     text: 'TypeScript',
-    published: getSupportedTSVersions(),
-    active: store.versions.typescript,
-  },
-})
-
-async function setVersion(key: VersionKey, v: string) {
-  versions[key].active = `loading...`
-  await store.setVersion(key, v)
-  versions[key].active = v
-}
-
-const toggleNightly = () => {
-  store.toggleNightly(nightly.value)
-  setVersion('elementPlus', 'latest')
-}
+    active: store.versions.typescript
+  }
+}))
 
 async function copyLink() {
   await navigator.clipboard.writeText(location.href)
-  ElMessage.success('Sharable URL has been copied to clipboard.')
+  MessagePlugin.success('Sharable URL has been copied to clipboard.')
 }
 </script>
 
@@ -69,16 +53,15 @@ async function copyLink() {
         v="mid"
         top="-2px"
         alt="logo"
-        src="../assets/logo.svg"
+        src="https://upyun.xuanmo.xin/logo/dl-ui.svg"
       />
       <div lt-sm-hidden flex="~ gap-1" items-center>
-        <div text-xl>Element Plus Playground</div>
-        <el-tag size="small">v{{ appVersion }}, repl v{{ replVersion }}</el-tag>
-        <el-tag v-if="store.pr" size="small">PR {{ store.pr }}</el-tag>
+        <div text-xl>DL Playground</div>
+        <t-tag theme="primary" size="small" variant="light">v{{ appVersion }}, repl v{{ replVersion }}</t-tag>
       </div>
     </div>
 
-    <div flex="~ gap-2" items-center>
+    <div flex="~ gap-4" items-center>
       <div
         v-for="(v, key) of versions"
         :key="key"
@@ -86,52 +69,24 @@ async function copyLink() {
         items-center
         lt-lg-hidden
       >
-        <span>{{ v.text }}:</span>
-        <el-select
-          :model-value="v.active"
-          size="small"
-          fit-input-width
-          w-36
-          @update:model-value="setVersion(key, $event)"
-        >
-          <el-option v-for="ver of v.published" :key="ver" :value="ver">
-            {{ ver }}
-          </el-option>
-        </el-select>
-
-        <el-checkbox
-          v-if="key === 'elementPlus'"
-          v-model="nightly"
-          @change="toggleNightly"
-        >
-          nightly
-        </el-checkbox>
+        <span>{{ v.text }}: </span>
+        <t-tag theme="primary" size="small" variant="light">{{ v.active }}</t-tag>
       </div>
 
-      <div flex="~ gap-4" text-lg>
-        <button hover:color-primary i-ri-share-line @click="copyLink" />
-        <button
-          hover:color-primary
-          i-ri-sun-line
-          dark:i-ri-moon-line
-          @click="toggleDark()"
-        />
+      <d-space :gap="16" class="icons">
+        <share-outlined size="small" @click="copyLink" />
+        <dark-outlined v-if="dark" size="small" @click="toggleDark()" />
+        <light-outlined v-else size="small" @click="toggleDark()" />
         <a
-          href="https://github.com/element-plus/element-plus-playground"
+          href="https://github.com/D-xuanmo/dl-playground"
           target="_blank"
-          flex
-          hover:color-primary
+          title="View on GitHub"
         >
-          <button title="View on GitHub" i-ri-github-fill />
+          <github-outlined size="small" />
         </a>
 
-        <el-popover trigger="click" width="300px">
-          <Settings />
-          <template #reference>
-            <button hover:color-primary i-ri:settings-line />
-          </template>
-        </el-popover>
-      </div>
+        <Settings :store="store" />
+      </d-space>
     </div>
   </nav>
 </template>
@@ -140,13 +95,13 @@ async function copyLink() {
 nav {
   --bg: #fff;
   --bg-light: #fff;
-  --border: #ddd;
+  --border: var(--d-border-color);
 
   --at-apply: 'box-border flex justify-between px-4 z-999 relative';
 
   height: var(--nav-height);
   background-color: var(--bg);
-  box-shadow: 0 0 6px var(--el-color-primary);
+  border-bottom: var(--d-border);
 }
 
 .dark nav {
@@ -156,5 +111,9 @@ nav {
 
   --at-apply: 'shadow-none';
   border-bottom: 1px solid var(--border);
+}
+
+.icons > * {
+  cursor: pointer;
 }
 </style>

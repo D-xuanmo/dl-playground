@@ -1,17 +1,9 @@
-<script setup lang="ts">
-import { ref, version as vueVersion } from 'vue'
-import { version as epVersion } from 'element-plus'
-import { ElementPlus } from '@element-plus/icons-vue'
-
-const msg = ref('Hello World!')
-</script>
-
 <template>
-  <h1>{{ msg }}</h1>
-  <el-input v-model="msg" />
-
-  <p>
-    <el-icon color="var(--el-color-primary)"><ElementPlus /></el-icon>
-    Element Plus {{ epVersion }} + Vue {{ vueVersion }}
-  </p>
+  <d-space :gap="10" wrap>
+    <d-button theme="default">default</d-button>
+    <d-button theme="primary">primary</d-button>
+    <d-button theme="success">success</d-button>
+    <d-button theme="warning">warning</d-button>
+    <d-button theme="danger">danger</d-button>
+  </d-space>
 </template>

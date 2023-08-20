@@ -1,7 +1,8 @@
 <script setup>
 import App from './App.vue'
-import { setupElementPlus } from './element-plus.js'
-setupElementPlus()
+import { setupDLUIPlus } from './dl-ui.js'
+
+setupDLUIPlus()
 </script>
 
 <template>

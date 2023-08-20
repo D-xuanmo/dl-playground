@@ -1,12 +1,11 @@
 {
-  "name": "element-plus-playground",
-  "version": "2.3.3",
+  "name": "dl-playground",
+  "version": "0.0.1",
   "packageManager": "pnpm@8.6.6",
-  "description": "Element Plus Playground",
+  "description": "DL Playground",
   "type": "module",
   "keywords": [
-    "element",
-    "element-plus",
+    "dl-ui",
     "playground",
     "repl"
   ],
@@ -24,22 +23,28 @@
     "@unocss/reset": "^0.53.5",
     "@vue/repl": "^2.5.5",
     "@vueuse/core": "^10.2.1",
-    "element-plus": "^2.3.7",
+    "@xuanmo/dl-common": "0.0.2-beta.66",
+    "@xuanmo/dl-icons": "^0.0.9",
+    "@xuanmo/dl-ui": "0.0.2-beta.29",
     "semver": "^7.5.4",
-    "vue": "^3.3.4"
+    "tdesign-vue-next": "^1.5.1",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4"
   },
   "devDependencies": {
     "@iconify-json/ri": "^1.1.10",
-    "@sxzz/eslint-config": "^3.1.2",
-    "@sxzz/prettier-config": "^1.0.4",
     "@types/node": "^20.4.1",
     "@types/semver": "^7.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
     "@unocss/transformer-directives": "^0.53.5",
     "@vitejs/plugin-vue": "^4.2.3",
     "@vue/runtime-core": "^3.3.4",
     "@vue/tsconfig": "^0.4.0",
     "bumpp": "^9.1.1",
     "eslint": "^8.44.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-vue": "^9.17.0",
     "local-pkg": "^0.4.3",
     "prettier": "^3.0.0",
     "sass": "^1.63.6",
@@ -51,6 +56,5 @@
     "vite-plugin-inspect": "^0.7.32",
     "vite-plugin-mkcert": "^1.16.0",
     "vue-tsc": "^1.8.4"
-  },
-  "prettier": "@sxzz/prettier-config"
+  }
 }

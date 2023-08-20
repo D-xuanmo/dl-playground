@@ -1,13 +1,13 @@
 import { getCurrentInstance } from 'vue'
-import ElementPlus from 'element-plus'
+import DLUI from '@xuanmo/dl-ui'
 
 let installed = false
 await loadStyle()
 
-export function setupElementPlus() {
+export function setupDLUIPlus() {
   if (installed) return
   const instance = getCurrentInstance()
-  instance.appContext.app.use(ElementPlus)
+  instance.appContext.app.use(DLUI)
   installed = true
 }
 

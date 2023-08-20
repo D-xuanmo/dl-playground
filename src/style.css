@@ -1,0 +1,12 @@
+:root {
+  --color-branding: var(--d-primary);
+}
+
+.active .indicator {
+  background-color: var(--d-primary) !important;
+}
+
+.file.active {
+  border-bottom: 3px solid var(--d-primary) !important;
+  color: var(--d-primary) !important;
+}

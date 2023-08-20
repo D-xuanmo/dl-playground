@@ -1,12 +1,14 @@
-import { File, type Store, type StoreState, compileFile } from '@vue/repl'
+import { compileFile, File, type Store, type StoreState } from '@vue/repl'
 import { type UnwrapNestedRefs } from 'vue'
+import { DialogPlugin, MessagePlugin } from '@xuanmo/dl-common'
 import { atou, utoa } from '@/utils/encode'
 import { genCdnLink, genImportMap, genVueLink } from '@/utils/dependency'
 import { type ImportMap, mergeImportMap } from '@/utils/import-map'
 import { IS_DEV } from '@/constants'
 import mainCode from '../template/main.vue?raw'
 import welcomeCode from '../template/welcome.vue?raw'
-import elementPlusCode from '../template/element-plus.js?raw'
+import dlCommonCode from '../template/dl-common.js?raw'
+import dluiCode from '../template/dl-ui.js?raw'
 import tsconfigCode from '../template/tsconfig.json?raw'
 
 export interface Initial {
@@ -15,35 +17,38 @@ export interface Initial {
   userOptions?: UserOptions
   pr?: string | null
 }
-export type VersionKey = 'vue' | 'elementPlus' | 'typescript'
+
+export type VersionKey = 'vue' | 'dlui' | 'dlCommon' | 'typescript'
 export type Versions = Record<VersionKey, string>
+
 export interface UserOptions {
   styleSource?: string
   showHidden?: boolean
 }
+
 export type SerializeState = Record<string, string> & {
   _o?: UserOptions
 }
 
 const MAIN_FILE = 'src/PlaygroundMain.vue'
 const APP_FILE = 'src/App.vue'
-const ELEMENT_PLUS_FILE = 'src/element-plus.js'
+const DL_COMMON_FILE = 'src/dl-common.js'
+const DLUI_FILE = 'src/dl-ui.js'
 const LEGACY_IMPORT_MAP = 'src/import_map.json'
 export const IMPORT_MAP = 'import-map.json'
 export const TSCONFIG = 'tsconfig.json'
 
 export const useStore = (initial: Initial) => {
   const versions = reactive(
-    initial.versions ||
-      ({
-        vue: 'latest',
-        elementPlus: 'latest',
-        typescript: 'latest',
-      } satisfies Versions)
+    ({
+      vue: '3.2.0',
+      dlui: 'latest',
+      dlCommon: 'latest',
+      typescript: 'latest'
+    } satisfies Versions)
   )
 
   const compiler = shallowRef<typeof import('vue/compiler-sfc')>()
-  const [nightly, toggleNightly] = useToggle(false)
   const userOptions = ref<UserOptions>(initial.userOptions || {})
   const hideFile = computed(() => !IS_DEV && !userOptions.value.showHidden)
 
@@ -63,12 +68,13 @@ export const useStore = (initial: Initial) => {
     resetFlip: false,
     locale: undefined,
     dependencyVersion: computed(() => ({
-      'element-plus': versions.elementPlus,
-    })),
+      'dlui': versions.dlui,
+      'dlCommon': versions.dlCommon
+    }))
   })
 
   const bultinImportMap = computed<ImportMap>(() =>
-    genImportMap(versions, nightly.value)
+    genImportMap(versions)
   )
   const userImportMap = computed<ImportMap>(() => {
     const code = state.files[IMPORT_MAP]?.code.trim()
@@ -100,32 +106,57 @@ export const useStore = (initial: Initial) => {
     getImportMap,
     renameFile,
     getTsConfig,
-    reloadLanguageTools: undefined,
+    reloadLanguageTools: undefined
   })
 
   watch(
-    () => versions.elementPlus,
+    () => versions.dlCommon,
     (version) => {
       const file = new File(
-        ELEMENT_PLUS_FILE,
-        generateElementPlusCode(version, userOptions.value.styleSource).trim(),
+        DL_COMMON_FILE,
+        generateDLCommonCode(version, userOptions.value.styleSource).trim(),
         hideFile.value
       )
-      state.files[ELEMENT_PLUS_FILE] = file
+      state.files[DL_COMMON_FILE] = file
       compileFile(store, file).then((errs) => (state.errors = errs))
     },
     { immediate: true }
   )
 
-  function generateElementPlusCode(version: string, styleSource?: string) {
+  watch(
+    () => versions.dlui,
+    (version) => {
+      const file = new File(
+        DLUI_FILE,
+        generateDLUICode(version, userOptions.value.styleSource).trim(),
+        hideFile.value
+      )
+      state.files[DLUI_FILE] = file
+      compileFile(store, file).then((errs) => (state.errors = errs))
+    },
+    { immediate: true }
+  )
+
+  function generateDLCommonCode(version: string, styleSource?: string) {
     const style = styleSource
       ? styleSource.replace('#VERSION#', version)
       : genCdnLink(
-          nightly.value ? '@element-plus/nightly' : 'element-plus',
-          version,
-          '/dist/index.css'
-        )
-    return elementPlusCode.replace('#STYLE#', style)
+        '@xuanmo/dl-common',
+        version,
+        '/dist/index.css'
+      )
+    return dlCommonCode.replace('#STYLE#', style)
+  }
+
+  function generateDLUICode(version: string, styleSource?: string) {
+    const style = styleSource
+      ? styleSource.replace('#VERSION#', version)
+      : genCdnLink(
+        '@xuanmo/dl-ui',
+        version,
+        '/dist/index.css'
+      )
+    return dluiCode.replace('#STYLE#', style)
   }
 
   async function setVueVersion(version: string) {
@@ -160,7 +191,7 @@ export const useStore = (initial: Initial) => {
         state.files[TSCONFIG]?.code,
         state.typescriptVersion,
         state.locale,
-        state.dependencyVersion,
+        state.dependencyVersion
       ],
       useDebounceFn(() => store.reloadLanguageTools?.(), 300),
       { deep: true }
@@ -183,15 +214,16 @@ export const useStore = (initial: Initial) => {
     state._o = userOptions.value
     return utoa(JSON.stringify(state))
   }
+
   function deserialize(text: string): SerializeState {
-    const state = JSON.parse(atou(text))
-    return state
+    return JSON.parse(atou(text))
   }
 
   function initFiles(serializedState: string) {
     const files: StoreState['files'] = {}
     if (serializedState) {
       const saved = deserialize(serializedState)
+      // eslint-disable-next-line prefer-const
       for (let [filename, file] of Object.entries(saved)) {
         if (filename === '_o') continue
         if (
@@ -252,7 +284,7 @@ export const useStore = (initial: Initial) => {
 
     if (
       file.hidden ||
-      [APP_FILE, MAIN_FILE, ELEMENT_PLUS_FILE, IMPORT_MAP].includes(oldFilename)
+      [APP_FILE, MAIN_FILE, DL_COMMON_FILE, DLUI_FILE, IMPORT_MAP].includes(oldFilename)
     ) {
       state.errors = [`Cannot rename ${oldFilename}`]
       return
@@ -275,37 +307,36 @@ export const useStore = (initial: Initial) => {
     compileFile(store, file)
   }
 
-  async function deleteFile(filename: string) {
+  function deleteFile(filename: string) {
     if (
       [
-        ELEMENT_PLUS_FILE,
+        DL_COMMON_FILE,
         MAIN_FILE,
         APP_FILE,
-        ELEMENT_PLUS_FILE,
-        IMPORT_MAP,
+        DLUI_FILE,
+        IMPORT_MAP
       ].includes(filename)
     ) {
-      ElMessage.warning(
+      MessagePlugin.warning(
         'You cannot remove it, because Element Plus requires it.'
       )
       return
     }
 
-    if (
-      await ElMessageBox.confirm(
-        `Are you sure you want to delete ${filename.replace(/^src\//, '')}?`,
-        {
-          title: 'Delete File',
-          type: 'warning',
-          center: true,
+    DialogPlugin.confirm({
+      title: 'Delete File',
+      theme: 'warning',
+      showIcon: true,
+      content: `Are you sure you want to delete ${filename.replace(/^src\//, '')}?`,
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      onConfirm() {
+        if (state.activeFile.filename === filename) {
+          setActive(APP_FILE)
         }
-      )
-    ) {
-      if (state.activeFile.filename === filename) {
-        setActive(APP_FILE)
+        delete state.files[filename]
       }
-      delete state.files[filename]
-    }
+    })
   }
 
   function getImportMap() {
@@ -325,8 +356,11 @@ export const useStore = (initial: Initial) => {
       case 'vue':
         await setVueVersion(version)
         break
-      case 'elementPlus':
-        versions.elementPlus = version
+      case 'dlCommon':
+        versions.dlCommon = version
+        break
+      case 'dlui':
+        versions.dlui = version
         break
       case 'typescript':
         versions.typescript = version
@@ -336,12 +370,10 @@ export const useStore = (initial: Initial) => {
 
   const utils = {
     versions,
-    nightly,
     userOptions,
     pr: initial.pr,
     serialize,
-    setVersion,
-    toggleNightly,
+    setVersion
   }
   Object.assign(store, utils)
 

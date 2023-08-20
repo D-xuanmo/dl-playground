@@ -4,7 +4,6 @@ import { defineConfig } from 'vite'
 import Unocss from 'unocss/vite'
 import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import AutoImport from 'unplugin-auto-import/vite'
 import Inspect from 'vite-plugin-inspect'
 import Mkcert from 'vite-plugin-mkcert'
@@ -18,21 +17,21 @@ export default defineConfig(async () => {
   return {
     resolve: {
       alias: {
-        '@': pathSrc,
-      },
+        '@': pathSrc
+      }
     },
     define: {
       'import.meta.env.APP_VERSION': JSON.stringify(pkg.version),
-      'import.meta.env.REPL_VERSION': JSON.stringify(repl!.version),
+      'import.meta.env.REPL_VERSION': JSON.stringify(repl!.version)
     },
     build: {
       rollupOptions: {
-        external: ['typescript'],
-      },
+        external: ['typescript']
+      }
     },
     server: {
       https: true,
-      host: true,
+      host: true
     },
     plugins: [
       vue({
@@ -41,27 +40,25 @@ export default defineConfig(async () => {
           propsDestructure: true,
           fs: {
             fileExists: fs.existsSync,
-            readFile: (file) => fs.readFileSync(file, 'utf-8'),
-          },
-        },
+            readFile: (file) => fs.readFileSync(file, 'utf-8')
+          }
+        }
       }),
       AutoImport({
         dirs: [path.resolve(pathSrc, 'composables')],
         imports: ['vue', '@vueuse/core'],
-        resolvers: [ElementPlusResolver()],
-        dts: path.resolve(pathSrc, 'auto-imports.d.ts'),
+        dts: path.resolve(pathSrc, 'auto-imports.d.ts')
       }),
       Components({
         dirs: [path.resolve(pathSrc, 'components')],
-        resolvers: [ElementPlusResolver()],
-        dts: path.resolve(pathSrc, 'components.d.ts'),
+        dts: path.resolve(pathSrc, 'components.d.ts')
       }),
       Unocss(),
       Mkcert(),
-      Inspect(),
+      Inspect()
     ],
     optimizeDeps: {
-      exclude: ['@vue/repl'],
-    },
+      exclude: ['@vue/repl']
+    }
   }
 })
