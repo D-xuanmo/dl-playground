@@ -108,7 +108,7 @@ async function setVersion(value: Record<string, string>) {
 useVersions('@xuanmo/dl-common', (options) => {
   formStore.updateModel('dlCommon', {
     options: options
-      .filter((version) => gte(version, '0.0.2-beta.66'))
+      .filter((version) => gte(version, '0.0.3'))
       .map((item) => ({
         value: item,
         label: item
@@ -118,7 +118,7 @@ useVersions('@xuanmo/dl-common', (options) => {
 useVersions('@xuanmo/dl-ui', (options) => {
   formStore.updateModel('dlui', {
     options: options
-      .filter((version) => gte(version, '0.0.2-beta.29'))
+      .filter((version) => gte(version, '0.0.3'))
       .map((item) => ({
         value: item,
         label: item
