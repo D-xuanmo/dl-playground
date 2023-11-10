@@ -1,7 +1,6 @@
 {
   "name": "dl-playground",
   "version": "0.0.1",
-  "packageManager": "pnpm@8.6.6",
   "description": "DL Playground",
   "type": "module",
   "keywords": [
@@ -23,9 +22,9 @@
     "@unocss/reset": "^0.53.5",
     "@vue/repl": "^2.5.5",
     "@vueuse/core": "^10.2.1",
-    "@xuanmo/dl-common": "0.0.2-beta.66",
+    "@xuanmo/dl-common": "latest",
     "@xuanmo/dl-icons": "^0.0.9",
-    "@xuanmo/dl-ui": "0.0.2-beta.29",
+    "@xuanmo/dl-ui": "latest",
     "semver": "^7.5.4",
     "tdesign-vue-next": "^1.5.1",
     "vue": "^3.3.4",
@@ -56,5 +55,6 @@
     "vite-plugin-inspect": "^0.7.32",
     "vite-plugin-mkcert": "^1.16.0",
     "vue-tsc": "^1.8.4"
-  }
+  },
+  "packageManager": "yarn@3.1.0"
 }

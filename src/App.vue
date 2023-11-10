@@ -41,7 +41,7 @@ watchEffect(() => history.replaceState({}, '', `#${store.serialize()}`))
 </script>
 
 <template>
-  <t-loading :loading="loading" h-100vh>
+  <d-loading :loading="loading" size="50px" description="编辑器初始化中..." h-100vh>
     <div v-if="!loading" antialiased>
       <Header :store="store" />
       <Repl
@@ -55,7 +55,7 @@ watchEffect(() => history.replaceState({}, '', `#${store.serialize()}`))
         @keydown="handleKeydown"
       />
     </div>
-  </t-loading>
+  </d-loading>
 </template>
 
 <style>
